@@ -1,17 +1,19 @@
 package domain;
 
-import java.util.ArrayList;
+import java.util.Stack;
 
+import factory.Ticket;
 
 public class Kiniela {
 	private static Kiniela kiniela;
 	private final String nombre;
 	
-	private ArrayList<Sorteo> sorteos; //Podría ser pila o lista ordenada
+	private Stack<Sorteo> pilaSorteos;
+	
 //Constructor
 	private Kiniela() {
-		this.nombre = "Kiniela Global";
-		this.sorteos = new ArrayList<>();
+		this.nombre = "Kini 5";
+		this.pilaSorteos = new Stack<>();
 	}
 	public static synchronized Kiniela getInstance()  {
 		if(kiniela == null) {
@@ -19,18 +21,39 @@ public class Kiniela {
 		}
 		return kiniela;
 	}
-	public void agregarSorteo(String fecha) {
-		if(!sorteos.isEmpty() && !sorteos.get(sorteos.size()-1).isActivo()) { //verificar si el ultimo sorteo NO isActivo
-				sorteos.add(new Sorteo(fecha));
-			
+	public void agregarSorteo(String fechaSorteo) {		//TODO Podría ser TRY CATCH
+		if(this.pilaSorteos.empty()) {
+			this.pilaSorteos.push(new Sorteo(fechaSorteo));
+		}else if(!this.pilaSorteos.peek().isActivo()) {
+			this.pilaSorteos.push(new Sorteo(fechaSorteo));
+		}else
+			System.out.println("Lo siento, ya existe un sorteo activo");
+	}
+	public boolean agregarTicketAlSorteo(Ticket ticket) {
+		boolean retorno = false;
+		if (!this.pilaSorteos.empty() && this.pilaSorteos.peek().isActivo()) {
+			retorno = this.pilaSorteos.peek().agregarTicket(ticket);
+		}
+		return retorno;
+	}
+	//DATOS TEMPORALES
+	public int sizeDeTickets() {
+		return this.pilaSorteos.peek().sizeTickets();
+	}
+	public void establecerPozoAcumulado(double pozoAcum) {
+		if (!this.pilaSorteos.empty() && this.pilaSorteos.peek().isActivo()) {
+			this.pilaSorteos.peek().setPozoAcumulado(pozoAcum);;
 		}
 	}
-	
-	
-	
-	//agregar tickets a los sorteos
-	//buscar ganadores
-	
+	public void cerrarSorteoConNumGanadores(int[] numGanadores) {
+		if (!this.pilaSorteos.empty() && this.pilaSorteos.peek().isActivo()) {
+			this.pilaSorteos.peek().setNumerosGanadores(numGanadores);
+			this.pilaSorteos.peek().setActivo(false);
+		}
+	}
+	public void listarGanadores() {
+		this.pilaSorteos.peek().listarGanadores();
+	}
 	
 	
 	
